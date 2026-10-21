@@ -1,12 +1,12 @@
 # Open Source mini-challenge
 
-**GitHub username:** `abhinavshukla152005`
+**GitHub username:** `abhinavshukla152005-beep`
 
 | | |
 | --- | --- |
-| Primary track repo (Apache-2.0, public) | https://github.com/abhinavshukla152005/aura-household-agent |
-| **New additional open-source project** | https://github.com/abhinavshukla152005/mcp-app-cards |
-| Contribution URL (the new project's initial commits) | https://github.com/abhinavshukla152005/mcp-app-cards/commits/main |
+| Primary track repo (Apache-2.0, public) | https://github.com/abhinavshukla152005-beep/aura-household-agent |
+| **New additional open-source project** | https://github.com/abhinavshukla152005-beep/mcp-app-cards |
+| Contribution URL (the new project's initial commits) | https://github.com/abhinavshukla152005-beep/mcp-app-cards/commits/main |
 | License | Apache-2.0 (both repos) |
 
 ## What `mcp-app-cards` is
