@@ -1,0 +1,5 @@
+# Node sources, fixtures and skill files are served/compared byte-for-byte, so keep
+# them LF on every platform — a CRLF SKILL.md breaks frontmatter parsing on Windows.
+* text=auto eol=lf
+*.png binary
+*.svg text eol=lf

@@ -72,7 +72,7 @@ async function main() {
 
   await check('Agent Skill is loadable as an MCP resource', async () => {
     const r = await client.readResource({ uri: 'skill://aura-household/SKILL.md' });
-    assert.match(r.contents[0].text, /^---\nname: aura-household/);
+    assert.match(r.contents[0].text, /^---\r?\nname: aura-household/);
     assert.match(r.contents[0].text, /description:/);
     const viaTool = await call('load_agent_skill');
     assert.ok(viaTool.content[0].text.length > 500, 'skill tool returned little');
