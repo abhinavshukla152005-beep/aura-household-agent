@@ -1,0 +1,5 @@
+node_modules/
+data/household.json
+*.log
+.env
+.DS_Store

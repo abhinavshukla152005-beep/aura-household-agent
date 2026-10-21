@@ -1,0 +1,30 @@
+{
+  "name": "aura-household-agent",
+  "version": "1.0.0",
+  "description": "Aura - a self-hosted MCP server + Agent Skill that gives Alexa+ cross-session household memory, autonomous multi-service routines, and card/carousel media responses.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "demo": "node scripts/demo.mjs",
+    "verify": "node tests/verify.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "alexa-plus",
+    "agent-skills",
+    "streamable-http",
+    "voice-assistant"
+  ],
+  "author": "Abhinav Shukla",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  }
+}

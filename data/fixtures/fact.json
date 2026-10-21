@@ -1,0 +1,7 @@
+{
+  "type": "standard",
+  "title": "Space exploration",
+  "extract": "Space exploration is the ongoing discovery and exploration of celestial structures in outer space. Crewed and robotic programmes have extended human presence to the Moon, Mars, and the outer planets.",
+  "thumbnail": { "source": "" },
+  "content_urls": { "desktop": "https://example.com/space-exploration" }
+}

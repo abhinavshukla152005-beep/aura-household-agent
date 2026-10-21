@@ -1,0 +1,14 @@
+{
+  "results": [
+    {
+      "id": 1273574,
+      "name": "Pune",
+      "latitude": 18.51957,
+      "longitude": 73.85535,
+      "admin1": "Maharashtra",
+      "country": "India",
+      "timezone": "Asia/Kolkata"
+    }
+  ],
+  "generationtime_ms": 0.02
+}

@@ -1,0 +1,89 @@
+{
+  "resultCount": 6,
+  "results": [
+    {
+      "trackId": 900000001,
+      "trackName": "The Lighthouse Keeper's Daughter",
+      "artistName": "Mirabel Studios",
+      "primaryGenreName": "Family",
+      "releaseDate": "2025-03-14",
+      "artworkUrl100": "",
+      "trackTimeMillis": 6240000,
+      "price": 5.99,
+      "currency": "USD",
+      "contentAdvisoryRating": "G",
+      "hasCurrentEpisode": false,
+      "trackViewUrl": "https://example.com/lighthouse-keepers-daughter"
+    },
+    {
+      "trackId": 900000002,
+      "trackName": "Monsoon Market",
+      "artistName": "Papercut Pictures",
+      "primaryGenreName": "Drama",
+      "releaseDate": "2024-11-02",
+      "artworkUrl100": "",
+      "trackTimeMillis": 7380000,
+      "price": 4.99,
+      "currency": "USD",
+      "contentAdvisoryRating": "PG",
+      "hasCurrentEpisode": false,
+      "trackViewUrl": "https://example.com/monsoon-market"
+    },
+    {
+      "trackId": 900000003,
+      "trackName": "Robo Rumble: Reboot",
+      "artistName": "Gearhead Animation",
+      "primaryGenreName": "Animation",
+      "releaseDate": "2026-01-21",
+      "artworkUrl100": "",
+      "trackTimeMillis": 5460000,
+      "price": 7.99,
+      "currency": "USD",
+      "contentAdvisoryRating": "G",
+      "hasCurrentEpisode": false,
+      "trackViewUrl": "https://example.com/robo-rumble-reboot"
+    },
+    {
+      "trackId": 900000004,
+      "trackName": "Night Shift at the Museum",
+      "artistName": "Copperfield Films",
+      "primaryGenreName": "Comedy",
+      "releaseDate": "2025-08-08",
+      "artworkUrl100": "",
+      "trackTimeMillis": 5880000,
+      "price": 12.99,
+      "currency": "USD",
+      "contentAdvisoryRating": "PG-13",
+      "hasCurrentEpisode": false,
+      "trackViewUrl": "https://example.com/night-shift-museum"
+    },
+    {
+      "trackId": 900000005,
+      "trackName": "Signal Lost",
+      "artistName": "Deep Field Media",
+      "primaryGenreName": "Thriller",
+      "releaseDate": "2026-04-30",
+      "artworkUrl100": "",
+      "trackTimeMillis": 6720000,
+      "price": 9.99,
+      "currency": "USD",
+      "contentAdvisoryRating": "R",
+      "hasCurrentEpisode": false,
+      "trackViewUrl": "https://example.com/signal-lost"
+    },
+    {
+      "trackId": 900000006,
+      "trackName": "Grandpa's Garden",
+      "artistName": "Little Lantern",
+      "primaryGenreName": "Kids",
+      "releaseDate": "2025-06-11",
+      "artworkUrl100": "",
+      "trackTimeMillis": 4800000,
+      "price": 3.49,
+      "currency": "USD",
+      "contentAdvisoryRating": "G",
+      "hasCurrentEpisode": false,
+      "trackViewUrl": "https://example.com/grandpas-garden"
+    }
+  ]
+}

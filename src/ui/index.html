@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aura - simulated Alexa+ household device</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="ring" id="ring"></span>
+      <div>
+        <h1>Aura</h1>
+        <p class="sub">simulated Alexa+ device · self-hosted MCP server over Streamable HTTP</p>
+      </div>
+    </div>
+    <div class="chips" id="status">
+      <span class="chip" data-k="protocol">MCP …</span>
+      <span class="chip" data-k="tools">tools …</span>
+      <span class="chip" data-k="session">session …</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="composer">
+      <div class="ask">
+        <button id="mic" class="mic" title="Use the microphone (Chrome / Edge)" aria-label="Speak">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 15a3.2 3.2 0 0 0 3.2-3.2V6a3.2 3.2 0 0 1 6.4 0v5.8A9.6 9.6 0 0 1 15.2 21v-2.2A6.4 6.4 0 0 0 20 12.4V6h-3.2v5.8A3.2 3.2 0 0 1 13.6 15H12Zm-3.2-3.2V6a3.2 3.2 0 0 0-6.4 0v5.8A9.6 9.6 0 0 0 12 21.4V19A6.4 6.4 0 0 1 5.6 12.4V11.8Z"/></svg>
+        </button>
+        <input id="utterance" autocomplete="off" placeholder="Say something to the household…">
+        <button id="send" class="primary">Ask Aura</button>
+      </div>
+      <div class="suggest" id="suggest">
+        <button>good morning</button>
+        <button>set up a movie night for everyone</button>
+        <button>we are out of chai, order snacks</button>
+        <button>play something to study to</button>
+        <button>time for bed</button>
+        <button>what did we watch last night?</button>
+      </div>
+      <div class="sessions">
+        <label>device session
+          <select id="session">
+            <option value="living-room">living-room</option>
+            <option value="bedroom">bedroom</option>
+            <option value="kitchen">kitchen</option>
+          </select>
+        </label>
+        <span class="hint">Household memory is shared across sessions - start in the kitchen, continue in the bedroom.</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>What the household sees</h2>
+        <div class="bubble" id="spoken">Waiting for the first request.</div>
+        <iframe id="cards" class="frame" title="Aura cards" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe>
+      </div>
+      <div class="panel">
+        <h2>Why it decided that</h2>
+        <p class="note">Live MCP Apps timeline: every tool call over Streamable HTTP, and every re-plan the agent made.</p>
+        <iframe id="plan" class="frame" title="Aura agent plan" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="memory">
+      <h2>Household memory</h2>
+      <pre id="mem">(loading…)</pre>
+    </section>
+  </main>
+
+  <footer>
+    <p>Aura · Apache-2.0 · built for the Build, Ship, Shape Amazon Developer Hackathon, Alexa+ track.
+      Visuals are <code>ui://</code> MCP resources rendered in sandboxed frames.</p>
+  </footer>
+  <script src="app.js" type="module"></script>
+</body>
+</html>

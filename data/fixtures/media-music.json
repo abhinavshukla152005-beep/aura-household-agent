@@ -1,0 +1,57 @@
+{
+  "resultCount": 4,
+  "results": [
+    {
+      "trackId": 910000001,
+      "trackName": "Rain on the Tin Roof",
+      "artistName": "Saaz Collective",
+      "primaryGenreName": "Ambient",
+      "releaseDate": "2025-07-04",
+      "artworkUrl100": "",
+      "trackTimeMillis": 252000,
+      "price": 1.29,
+      "currency": "USD",
+      "contentAdvisoryRating": "Not Explicit",
+      "collectionViewUrl": "https://example.com/rain-on-the-tin-roof"
+    },
+    {
+      "trackId": 910000002,
+      "trackName": "Study Lights",
+      "artistName": "Quiet Carriage",
+      "primaryGenreName": "Instrumental",
+      "releaseDate": "2024-09-19",
+      "artworkUrl100": "",
+      "trackTimeMillis": 198000,
+      "price": 0.99,
+      "currency": "USD",
+      "contentAdvisoryRating": "Not Explicit",
+      "collectionViewUrl": "https://example.com/study-lights"
+    },
+    {
+      "trackId": 910000003,
+      "trackName": "Kitchen Disco",
+      "artistName": "The Brass Loops",
+      "primaryGenreName": "Funk",
+      "releaseDate": "2026-02-02",
+      "artworkUrl100": "",
+      "trackTimeMillis": 214000,
+      "price": 1.49,
+      "currency": "USD",
+      "contentAdvisoryRating": "Explicit",
+      "collectionViewUrl": "https://example.com/kitchen-disco"
+    },
+    {
+      "trackId": 910000004,
+      "trackName": "Slow Morning",
+      "artistName": "Anaya Rao",
+      "primaryGenreName": "Acoustic",
+      "releaseDate": "2025-12-01",
+      "artworkUrl100": "",
+      "trackTimeMillis": 176000,
+      "price": 0.79,
+      "currency": "USD",
+      "contentAdvisoryRating": "Not Explicit",
+      "collectionViewUrl": "https://example.com/slow-morning"
+    }
+  ]
+}

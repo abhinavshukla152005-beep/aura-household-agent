@@ -1,0 +1,22 @@
+{
+  "latitude": 18.51957,
+  "longitude": 73.85535,
+  "timezone": "Asia/Kolkata",
+  "current": {
+    "time": "2026-10-21T19:30",
+    "temperature_2m": 24.1,
+    "apparent_temperature": 24.6,
+    "relative_humidity_2m": 78,
+    "weather_code": 61,
+    "wind_speed_10m": 11.4
+  },
+  "daily": {
+    "time": ["2026-10-21"],
+    "weather_code": [61],
+    "temperature_2m_max": [27.8],
+    "temperature_2m_min": [21.3],
+    "sunrise": ["2026-10-21T06:31"],
+    "sunset": ["2026-10-21T18:09"],
+    "precipitation_probability_max": [74]
+  }
+}

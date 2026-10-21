@@ -1,0 +1,35 @@
+{
+  "hits": [
+    {
+      "objectID": "10000001",
+      "title": "Show HN: A tiny MCP server that runs my household errands",
+      "points": 812,
+      "url": "https://example.com/mcp-household"
+    },
+    {
+      "objectID": "10000002",
+      "title": "Voice add-ons can now keep state between conversations",
+      "points": 544,
+      "url": "https://example.com/assistant-state"
+    },
+    {
+      "objectID": "10000003",
+      "title": "Why voice interfaces need a card layer",
+      "points": 397,
+      "url": "https://example.com/voice-cards"
+    },
+    {
+      "objectID": "10000004",
+      "title": "Agent Skills: teaching coding assistants your project conventions",
+      "points": 288,
+      "url": "https://example.com/agent-skills"
+    },
+    {
+      "objectID": "10000005",
+      "title": "Ask HN: What chores should a home agent never be allowed to do?",
+      "points": 231,
+      "url": "https://example.com/agent-chores"
+    }
+  ],
+  "nbHits": 5
+}
