@@ -2,6 +2,14 @@
 
 **Build, Ship, Shape: Amazon Developer Hackathon · Alexa+ track · + Open Source mini-challenge**
 
+> The official rules ask Alexa+ judges to separate *creative* from *obvious*, and name what
+> counts as creative: "agentic workflow that orchestrates across services autonomously,
+> context-aware add-on that maintains state across sessions, purchasing capabilities, media
+> support (cards, carousels, etc), MCP Apps, Agent Skills." **All six are implemented here**, and
+> [`docs/JUDGING_MAP.md`](docs/JUDGING_MAP.md) points each one at a file and at the `npm run
+> verify` check that fails if it is removed. The two patterns the rules call *obvious* — a
+> single-turn Q&A bot, and a basic MCP wrapper around one existing API — are what this is not.
+
 A self-hosted **MCP server** (Streamable HTTP, protocol `2025-11-25`) plus an **Agent Skill**
 that gives an Alexa+ style assistant three things it does not have out of the box:
 
@@ -43,6 +51,12 @@ npm start                    # http://localhost:8787
 Open <http://localhost:8787> — that page is the **simulated Alexa+ device** the rules allow:
 a microphone button (Web Speech API), suggestion chips, the card/carousel surface, the live
 agent timeline, and the household memory inspector.
+
+Amazon does not ship a local host simulator for this surface, so building the harness was part
+of the work, not a shortcut around it: the page is a real `Client` +
+`StreamableHTTPClientTransport` that reads the `ui://` templates back *through MCP*, so every
+step between the two halves is exercised rather than stubbed. That gap is logged as feature
+request #1 and friction F1 in [`FRICTION_LOG.md`](FRICTION_LOG.md).
 
 Two other ways to see it work:
 

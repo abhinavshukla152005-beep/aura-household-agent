@@ -3,6 +3,37 @@
 Where to look for each criterion, and the fastest way to see it. Every row is reproducible with
 `npm install && npm run verify` (offline, deterministic) or `npm start` + the browser.
 
+## 0. The rules' own Alexa+ list, item by item
+
+The Official Rules (section 6, Stage Two) tell judges to "distinguish creative ideas from obvious
+ones". For the Alexa+ track they spell out both sides of that line. Quoted verbatim, and mapped to
+the `npm run verify` check number that fails if the capability is removed:
+
+| Rules' wording for a *creative* Alexa+ submission | Aura | `npm run verify` line |
+| --- | --- | --- |
+| "agentic workflow that orchestrates across services autonomously" | `src/agent.js` — classify → plan → act → observe → **re-plan** → speak, five services in one plan | 10 · *re-plans when the weather contradicts the plan* |
+| "context-aware add-on that maintains state across sessions" | `src/memory.js` — members, allergies, pantry, cap, last routine; survives a restart | 11 · *memory survives across sessions*, 9 · *allergen memory vetoes* |
+| "purchasing capabilities" | `place_order` behind the household ceiling (`src/memory.js:124`) — over cap returns `needs_confirmation`, the planner cannot set `confirmed` | 7 + 8 · *guardrail blocks an over-cap purchase* / *succeeds once the user confirms* |
+| "media support (cards, carousels, etc)" | `src/ui/templates.js` — tile / list / carousel / basket, agent's own pick outlined | 4 · *tool results carry `_meta.ui.resourceUri`* |
+| "MCP Apps" | `ui://aura/cards`, `ui://aura/plan` served as `text/html;profile=mcp-app`, read back through MCP | 3 · *UI templates use the MCP Apps mime type* |
+| "Agent Skills" | `skills/aura-household/SKILL.md` + `references/`, also served as `skill://` and via `load_agent_skill` | 5 · *Agent Skill is loadable as an MCP resource* |
+
+(`verify` prints the 15 checks as labels in this fixed order, so the numbers above are the line
+positions.)
+
+The rules' *obvious* examples are "single-turn Q&A bot" and "basic MCP wrapper around an existing
+API". Neither applies: Aura re-plans mid-run, holds state across sessions, and its 13 tools expose
+a policy engine, a memory model and a spending guardrail rather than proxying one API.
+
+Two other rule clauses that are easy to leave on the table, and where they are answered:
+
+- **Behaviour a judge can trigger on demand** — quiet hours, curfew and bedtime card substitution
+  are checks #12, #13, #14, and `POST /api/agent` accepts an `hour` field so they demo at 14:00 too.
+- **"Submissions with friction logs can earn up to a 10% judging bonus"** — 7 entries in
+  [`../FRICTION_LOG.md`](../FRICTION_LOG.md), ranked feature requests in
+  [`../FEATURE_REQUESTS.md`](../FEATURE_REQUESTS.md), per-tool feedback in
+  [`../PRODUCT_FEEDBACK.md`](../PRODUCT_FEEDBACK.md).
+
 ## 1. Tech Implementation — *does it use the required technology effectively?*
 
 Track requirement: a self-hosted MCP server on spec **2025-11-25 or later, Streamable HTTP**.
