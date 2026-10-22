@@ -2,6 +2,7 @@ const $ = (s) => document.querySelector(s);
 const els = {
   ring: $('#ring'), spoken: $('#spoken'), cards: $('#cards'), plan: $('#plan'),
   utter: $('#utterance'), send: $('#send'), mic: $('#mic'), session: $('#session'),
+  clock: $('#clock'),
   status: $('#status'), mem: $('#mem'), suggest: $('#suggest')
 };
 
@@ -55,10 +56,13 @@ async function ask(utterance) {
   els.ring.classList.add('thinking');
   els.spoken.textContent = `“${utterance}” — thinking…`;
   try {
+    const clock = els.clock ? els.clock.value : 'live';
+    const body = { utterance, session: els.session.value };
+    if (clock !== 'live') body.hour = Number(clock);
     const res = await fetch('/api/agent', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ utterance, session: els.session.value })
+      body: JSON.stringify(body)
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'agent call failed');

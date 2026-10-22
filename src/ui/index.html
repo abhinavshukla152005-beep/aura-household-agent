@@ -47,7 +47,18 @@
             <option value="kitchen">kitchen</option>
           </select>
         </label>
+        <label>household clock
+          <select id="clock">
+            <option value="live">live time</option>
+            <option value="23">23:05 - after curfew</option>
+            <option value="7">07:05 - morning briefing</option>
+          </select>
+        </label>
         <span class="hint">Household memory is shared across sessions - start in the kitchen, continue in the bedroom.</span>
+        <span class="hint">The clock setting is a stated simulation of the household's local time, so curfew and
+          quiet-hours re-planning is reproducible on any machine; nothing else is overridden. Rain-triggered
+          re-planning needs a rainy observation - run <code>AURA_OFFLINE=1 npm start</code> for the bundled
+          wet-evening fixture.</span>
       </div>
     </section>
 

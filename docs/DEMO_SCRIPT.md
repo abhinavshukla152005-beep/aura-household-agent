@@ -22,6 +22,14 @@ Open `http://localhost:8787`, DevTools closed, address bar visible (proves local
 | 6 | 2:05–2:25 | Switch session dropdown to **bedroom**, type **what did we watch last night?** | "New device, new session. It already knows: that is `commit_routine` handing last night's decision to household memory." |
 | 7 | 2:25–2:40 | Terminal: `npm run verify` → `15/15 checks passed` | "Fifteen acceptance checks prove the protocol version, the MCP Apps mime type, the guardrail, the allergen veto and the cross-session memory. `npm start`, then open port 8787 — no keys, no hardware. Thanks for watching." |
 
+## If a judge drives it themselves
+The rain-driven re-plan in row 3 needs a rainy *observation*, which depends on the weather at the
+machine it runs on. Two ways to make it reproducible, neither of which touches the planner:
+- **household clock = 23:05** in the device bar (or `"hour": 23` in the JSON body) → the curfew
+  re-plan and the `SKIPPED` `place_order` fire on demand, anywhere.
+- **`AURA_OFFLINE=1 npm start`** → the bundled wet-evening fixture (rain risk 74%) drives the
+  weather re-plan exactly as the video shows.
+
 ## Recording rules the judges care about
 - Show the project **functioning**, on the surface it is intended for (the simulated Alexa+ web
   experience, which the Alexa+ track explicitly allows).

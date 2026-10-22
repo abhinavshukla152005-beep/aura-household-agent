@@ -52,6 +52,10 @@ Open <http://localhost:8787> — that page is the **simulated Alexa+ device** th
 a microphone button (Web Speech API), suggestion chips, the card/carousel surface, the live
 agent timeline, and the household memory inspector.
 
+The device bar also has a **household clock** selector (live / 23:05 after the curfew / 07:05). It only
+sets the `hour` the planner reasons about — the same value the `curl` example below already accepts — so
+the time-dependent re-planning is reproducible whatever weather and timezone the judge's machine has.
+
 Amazon does not ship a local host simulator for this surface, so building the harness was part
 of the work, not a shortcut around it: the page is a real `Client` +
 `StreamableHTTPClientTransport` that reads the `ui://` templates back *through MCP*, so every
@@ -130,7 +134,8 @@ tool-calling model — the tool surface, guardrails and memory are unchanged.
 | --- | --- | --- |
 | Protocol + transport | `npm run verify` check 1, or `curl localhost:8787/health` | `protocol: 2025-11-25` over Streamable HTTP |
 | MCP Apps cards | Ask *"set up a movie night"* in the web app | right-hand carousel renders inside a sandboxed frame from `ui://aura/cards` |
-| Autonomous re-plan | same answer, "Why it decided that" panel | blue `ADDED-BY-AGENT` rows with a reason |
+| Autonomous re-plan | set **household clock = 23:05** in the device bar, then ask *"set up a movie night"* | `ADDED-BY-AGENT` row (audio instead of video) and a `SKIPPED` `place_order` — reproducible on any machine, in any weather |
+| Autonomous re-plan, weather-driven | `AURA_OFFLINE=1 npm start`, ask *"set up a movie night"* | wet-evening fixture triggers the indoor-swap re-plan |
 | Spend guardrail | `npm run verify` checks 7–8, or ask *"order snacks"* | `needs_confirmation` above the cap; nothing bought until `confirmed: true` |
 | Allergen memory | ask *"we are out of chai, order snacks"* | peanut brittle and yogurt vetoed *by name of the member they're unsafe for* |
 | Cross-session memory | movie night in `living-room`, then *"what did we watch last night?"* in `bedroom` | answers from carried memory, no questions back |
