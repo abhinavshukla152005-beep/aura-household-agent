@@ -142,6 +142,9 @@ tool-calling model — the tool surface, guardrails and memory are unchanged.
 | Curfew / quiet hours | `curl` the `hour: 23` example above | headlines skipped, calm card substituted, video converted to audio |
 
 `npm run verify` prints `15/15 checks passed` and exits non-zero on any regression.
+[`docs/RUN_LOG_2026-10-22.md`](docs/RUN_LOG_2026-10-22.md) records a clean clone of commit `37c3104`
+run through exactly these commands — install, verify, demo, the curfew `curl`, and the browser surface —
+with the real output of each.
 [`docs/JUDGING_MAP.md`](docs/JUDGING_MAP.md) maps each judging criterion to the files and the
 check that evidences it.
 
