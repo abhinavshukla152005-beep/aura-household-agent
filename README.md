@@ -145,10 +145,13 @@ tool-calling model — the tool surface, guardrails and memory are unchanged.
 | Agent Skill contract is enforced, not assumed | `npm run validate:skills`, or `npm run verify` check 18 | 7 checks pass against the real `skills/aura-household/SKILL.md`; pointed at a deliberately broken fixture it exits 1 and names the offending key (`verify` check 18 does exactly that, with a temp directory it cleans up) |
 
 `npm run verify` prints `18/18 checks passed` and exits non-zero on any regression.
-[`docs/RUN_LOG_2026-10-23.md`](docs/RUN_LOG_2026-10-23.md) records a clean clone of commit `99ea087` run
-through exactly these commands — install, verify, demo, and a real MCP `callTool` of
-`describe_last_decision` — with the real output of each;
-[`docs/RUN_LOG_2026-10-22.md`](docs/RUN_LOG_2026-10-22.md) is the earlier run, at commit `37c3104`.
+[`docs/RUN_LOG_2026-10-23B.md`](docs/RUN_LOG_2026-10-23B.md) is the current run — a clean clone of commit
+`6cb7293`, install, `validate:skills`, verify, demo, plus the tool/resource/prompt counts read off the
+running server.
+[`docs/RUN_LOG_2026-10-23.md`](docs/RUN_LOG_2026-10-23.md) records the earlier clean clone at `99ea087`
+(17 checks, and a real MCP `callTool` of
+`describe_last_decision` — with the real output of each);
+[`docs/RUN_LOG_2026-10-22.md`](docs/RUN_LOG_2026-10-22.md) is the earliest run, at commit `37c3104`.
 [`docs/JUDGING_MAP.md`](docs/JUDGING_MAP.md) maps each judging criterion to the files and the
 check that evidences it.
 
