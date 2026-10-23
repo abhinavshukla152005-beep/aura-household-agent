@@ -143,9 +143,10 @@ tool-calling model — the tool surface, guardrails and memory are unchanged.
 | Decision is explainable, not just claimed | call `describe_last_decision`, or `npm run verify` check 17 | returns the routine's persisted trace: tools in execution order, every `added-by-agent` step with the planner's own reason text, every `skipped` step, and whether the spend cap blocked a purchase. `traceAvailable: false` when no trace was stored — it never guesses |
 
 `npm run verify` prints `17/17 checks passed` and exits non-zero on any regression.
-[`docs/RUN_LOG_2026-10-22.md`](docs/RUN_LOG_2026-10-22.md) records a clean clone of commit `37c3104`
-run through exactly these commands — install, verify, demo, the curfew `curl`, and the browser surface —
-with the real output of each.
+[`docs/RUN_LOG_2026-10-23.md`](docs/RUN_LOG_2026-10-23.md) records a clean clone of commit `99ea087` run
+through exactly these commands — install, verify, demo, and a real MCP `callTool` of
+`describe_last_decision` — with the real output of each;
+[`docs/RUN_LOG_2026-10-22.md`](docs/RUN_LOG_2026-10-22.md) is the earlier run, at commit `37c3104`.
 [`docs/JUDGING_MAP.md`](docs/JUDGING_MAP.md) maps each judging criterion to the files and the
 check that evidences it.
 
