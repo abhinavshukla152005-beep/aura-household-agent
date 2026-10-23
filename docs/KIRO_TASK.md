@@ -89,8 +89,8 @@ Two things worth recording about the output:
 ### What I did, not Kiro
 
 Kiro ran no git command — the prompts forbid commit/push/branch, and `git status` confirmed it only edited
-files. Verification afterwards was manual: `npm run verify` 18/18, `npm run validate:skills`, `npm run demo`,
-a fresh clone of the
+files. Verification afterwards was manual: `npm run verify` (18/18 at that commit; 19/19 now, after I added the
+`explain` voice path and check 19 myself), `npm run validate:skills`, `npm run demo`, a fresh clone of the
 pushed commit, and a read of the diff. Tool/resource/prompt counts in the README were corrected by hand
 after measuring the running server (14 tools, 6 resources, 3 prompts, 3 `ui://` templates) instead of
 trusting the docs.

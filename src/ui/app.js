@@ -1,12 +1,17 @@
 const $ = (s) => document.querySelector(s);
 const els = {
   ring: $('#ring'), spoken: $('#spoken'), cards: $('#cards'), plan: $('#plan'),
+  decision: $('#decision'),
   utter: $('#utterance'), send: $('#send'), mic: $('#mic'), session: $('#session'),
   clock: $('#clock'),
   status: $('#status'), mem: $('#mem'), suggest: $('#suggest')
 };
 
-const frames = { cards: { el: els.cards, ready: false }, plan: { el: els.plan, ready: false } };
+const frames = {
+  cards: { el: els.cards, ready: false },
+  plan: { el: els.plan, ready: false },
+  decision: { el: els.decision, ready: false }
+};
 let pending = null;
 
 function setChip(key, text) {
@@ -21,6 +26,7 @@ async function boot() {
     setChip('session', h.tokenRequired ? 'auth on' : 'local dev');
     els.cards.src = '/api/resource?uri=' + encodeURIComponent('ui://aura/cards');
     els.plan.src = '/api/resource?uri=' + encodeURIComponent('ui://aura/plan');
+    els.decision.src = '/api/resource?uri=' + encodeURIComponent('ui://aura/decision');
     const p = await (await fetch('/api/household')).json();
     els.mem.textContent = JSON.stringify(p, null, 2);
     setChip('tools', `${p.members.length} members · budget ${p.rules.spendBudget} · curfew ${p.rules.screenTimeCurfewLocal}`);
@@ -47,7 +53,9 @@ function push(payload) {
   for (const [key, f] of Object.entries(frames)) {
     const params = key === 'cards'
       ? { cards: payload.cards, spoken: payload.spoken }
-      : { trace: payload.trace, title: payload.title, spoken: payload.spoken };
+      : key === 'decision'
+        ? (payload.decision || { found: false, reason: 'Nothing to explain yet - run a routine, then ask "why did that change?".' })
+        : { trace: payload.trace, title: payload.title, spoken: payload.spoken };
     f.el.contentWindow.postMessage({ jsonrpc: '2.0', method: 'ui/render', params }, '*');
   }
 }
@@ -70,7 +78,8 @@ async function ask(utterance) {
       cards: data.cards,
       trace: data.routine.trace,
       spoken: data.routine.spokenSummary,
-      title: data.intent.label
+      title: data.intent.label,
+      decision: data.ctx?.decision || null
     };
     els.spoken.textContent = data.routine.spokenSummary;
     setChip('tools', `MCP · ${data.mcp.toolCount} tools · skill ${Math.round(data.mcp.skillLoaded / 1000)}k chars`);

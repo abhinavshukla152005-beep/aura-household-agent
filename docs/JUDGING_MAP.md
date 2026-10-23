@@ -18,7 +18,7 @@ the `npm run verify` check number that fails if the capability is removed:
 | "MCP Apps" | `ui://aura/cards`, `ui://aura/plan`, `ui://aura/decision` served as `text/html;profile=mcp-app`, read back through MCP | 3 · *UI templates use the MCP Apps mime type* |
 | "Agent Skills" | `skills/aura-household/SKILL.md` + `references/`, also served as `skill://` and via `load_agent_skill`; `npm run validate:skills` checks its frontmatter against what the server registers | 5 · *Agent Skill is loadable as an MCP resource*, 18 · *validate-skills catches a broken skill* |
 
-(`verify` prints the 18 checks as labels in this fixed order, so the numbers above are the line
+(`verify` prints the 19 checks as labels in this fixed order, so the numbers above are the line
 positions.)
 
 The rules' *obvious* examples are "single-turn Q&A bot" and "basic MCP wrapper around an existing
@@ -51,7 +51,7 @@ Track requirement: a self-hosted MCP server on spec **2025-11-25 or later, Strea
 | Agentic loop: classify → plan → act → observe → **re-plan** → speak | `src/agent.js:20,34,70,82` |
 | Auth surface (`AURA_TOKEN` bearer) and `/.well-known/oauth-protected-resource` | `src/server.js` |
 
-Fastest proof: `npm run verify` → 18 checks, all of which fail if the MCP surface is removed.
+Fastest proof: `npm run verify` → 19 checks, all of which fail if the MCP surface is removed.
 
 ## 2. Design — *complete, coherent experience; interaction model fits the device*
 

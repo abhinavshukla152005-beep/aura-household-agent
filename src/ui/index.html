@@ -38,6 +38,7 @@
         <button>play something to study to</button>
         <button>time for bed</button>
         <button>what did we watch last night?</button>
+        <button>why did that change?</button>
       </div>
       <div class="sessions">
         <label>device session
@@ -72,6 +73,9 @@
         <h2>Why it decided that</h2>
         <p class="note">Live MCP Apps timeline: every tool call over Streamable HTTP, and every re-plan the agent made.</p>
         <iframe id="plan" class="frame" title="Aura agent plan" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe>
+        <h2>Why it decided that, in its own words</h2>
+        <p class="note">Rendered from <code>ui://aura/decision</code> — the trace the routine stored when it committed, read back by <code>describe_last_decision</code>. Ask "why did that change?" to fill it.</p>
+        <iframe id="decision" class="frame" title="Aura last decision trace" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe>
       </div>
     </section>
 

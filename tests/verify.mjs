@@ -264,6 +264,28 @@ async function main() {
     }
   });
 
+  await check('asking "why did that change?" reaches describe_last_decision over MCP', async () => {
+    const res = await fetch(`${BASE}/api/agent`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ utterance: 'why did that change?', session: 'check19' })
+    });
+    const data = await res.json();
+    assert.equal(data.intent.intent, 'explain', 'classifier routed the question somewhere else: ' + JSON.stringify(data.intent));
+    assert.ok(data.routine.trace.some((t) => t.tool === 'describe_last_decision'),
+      'the turn never called describe_last_decision');
+    assert.ok(data.mcp.toolCount >= 2, `expected at least 2 MCP tool calls, got ${data.mcp.toolCount}`);
+    const d = data.ctx?.decision;
+    assert.ok(d && d.found, 'a previous routine should be explainable by now');
+    assert.ok(d.traceAvailable, 'expected a stored trace, got: ' + d.reason);
+    const adds = d.addedByAgent || [], skips = d.skippedSteps || [];
+    assert.ok(adds.length + skips.length > 0, 'trace carries no added or skipped steps to explain');
+    const decisive = adds[adds.length - 1] || skips[skips.length - 1];
+    const text = String(decisive.why || decisive.reason);
+    assert.ok(text.length > 8, 'reason text is not a real sentence: ' + text);
+    assert.ok(data.routine.spokenSummary.includes(text.slice(0, 40)),
+      'spoken answer does not quote the planner reason; got: ' + data.routine.spokenSummary);
+  });
+
   await client.close();
   child.kill();
 

@@ -9,6 +9,7 @@
 import { isFamilySafe } from './services/media.js';
 
 const INTENTS = [
+  { intent: 'explain', say: 'Explain the last decision', match: /\b(why did|why'd|why didn'?t|why no[t]? |how come|what changed|explain (that|your|the|what|it)|give me the reason|reason for (that|the|your)|what made you)\b/i },
   { intent: 'memory', say: 'Recall from household memory', match: /(remember|last time|what did (we|you)|earlier tonight|yesterday night|our history|state of the household)/i },
   { intent: 'morningBriefing', say: 'Good morning briefing', match: /(good morning|wake me|start my day|brief me|what.s today)/i },
   { intent: 'movieNight', say: 'Family movie night', match: /(movie|film|watch|cinema|entertain|movie night)/i },
@@ -54,6 +55,9 @@ export function initialPlan({ intent }, ctx) {
   if (intent === 'restock') {
     steps.push({ tool: 'pantry_status', args: {}, why: 'What is actually at or below reorder level' });
   }
+  if (intent === 'explain') {
+    steps.push({ tool: 'describe_last_decision', args: {}, why: 'Read back the trace stored when the last routine committed' });
+  }
   if (intent === 'memory') {
     steps.push({ tool: 'household_audit', args: { limit: 5 }, why: 'Read back what the household already decided' });
   }
@@ -76,6 +80,7 @@ export function observe(step, result, ctx) {
   if (step.tool === 'news_briefing') ctx.headlines = result.items;
   if (step.tool === 'learn_fact') ctx.fact = result;
   if (step.tool === 'household_audit') ctx.audit = result.entries;
+  if (step.tool === 'describe_last_decision') ctx.decision = result;
   return notes;
 }
 
@@ -262,13 +267,31 @@ function summarise(tool, r) {
     case 'pantry_status': return `${r.low.length} low, allergens ${r.trackedAllergens.join('/') || 'none'}`;
     case 'household_profile': return `${r.members.length} members, budget ${r.rules.spendBudget}`;
     case 'convert_price': return r.spoken || `${r.converted} ${r.to}`;
+    case 'describe_last_decision': return r.traceAvailable
+      ? `${r.routineName}: ${r.addedByAgent.length} step(s) added by me, ${r.skippedSteps.length} skipped`
+      : `${r.routineName}: no stored trace (${r.reason})`;
     default: return typeof r === 'object' ? JSON.stringify(r).slice(0, 80) : String(r);
   }
 }
 
 function spoken(cls, ctx, chosen, money, order) {
   const bits = [];
-  if (ctx.intent === 'memory') {
+  if (ctx.intent === 'explain') {
+    const d = ctx.decision;
+    if (!d || !d.found) {
+      bits.push('There is nothing to explain yet - this household has no committed routine.');
+    } else if (!d.traceAvailable) {
+      bits.push(`The last one was ${d.routineName}, committed before this household stored per-step traces, so I cannot show its steps.`);
+    } else {
+      bits.push(`Last time I ran ${d.routineName} at ${String(d.committedAt).slice(11, 16)}.`);
+      const adds = d.addedByAgent || [], skips = d.skippedSteps || [];
+      bits.push(`I ran ${d.toolsInOrder?.length || 0} steps: ${adds.length} added as the plan changed, ${skips.length} skipped.`);
+      const decisive = adds[adds.length - 1] || skips[skips.length - 1];
+      if (decisive) bits.push(`The one that mattered - ${decisive.tool}: ${String(decisive.why || decisive.reason || '').slice(0, 160)}`);
+      if (!adds.length && !skips.length) bits.push('Nothing had to change mid-run.');
+      if (d.purchaseBlocked) bits.push('And I did not spend: the household cap needed a spoken yes.');
+    }
+  } else if (ctx.intent === 'memory') {
     const last = ctx.profile?.lastRoutine;
     bits.push(last ? `Last time: ${last.summary || last.name} at ${String(last.at).slice(11, 16)}.` : 'This household has no committed routine yet.');
     if (ctx.audit?.length) bits.push(`Most recently I ${ctx.audit[0].verb.replace(/([A-Z])/g, ' $1').toLowerCase()}: ${ctx.audit[0].detail}`);

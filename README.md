@@ -66,7 +66,7 @@ Two other ways to see it work:
 
 ```bash
 npm run demo           # headless CLI: 4 spoken turns, ASCII cards, full trace, audit log
-npm run verify         # 18 acceptance checks (protocol, MCP Apps mime, guardrails, memory, decision audit, skill contract)
+npm run verify         # 19 acceptance checks (protocol, MCP Apps mime, guardrails, memory, decision audit, skill contract)
 npm run validate:skills # check SKILL.md frontmatter against what the server actually registers
 ```
 
@@ -141,10 +141,10 @@ tool-calling model — the tool surface, guardrails and memory are unchanged.
 | Allergen memory | ask *"we are out of chai, order snacks"* | peanut brittle and yogurt vetoed *by name of the member they're unsafe for* |
 | Cross-session memory | movie night in `living-room`, then *"what did we watch last night?"* in `bedroom` | answers from carried memory, no questions back |
 | Curfew / quiet hours | `curl` the `hour: 23` example above | headlines skipped, calm card substituted, video converted to audio |
-| Decision is explainable, not just claimed | call `describe_last_decision`, or `npm run verify` check 17 | returns the routine's persisted trace: tools in execution order, every `added-by-agent` step with the planner's own reason text, every `skipped` step, and whether the spend cap blocked a purchase. `traceAvailable: false` when no trace was stored — it never guesses |
+| Decision is explainable, not just claimed | say *"why did that change?"*, call `describe_last_decision`, or `npm run verify` check 17 | returns the routine's persisted trace: tools in execution order, every `added-by-agent` step with the planner's own reason text, every `skipped` step, and whether the spend cap blocked a purchase. `traceAvailable: false` when no trace was stored — it never guesses. Check 19 proves the voice path reaches it, and the demo page renders it in a third `ui://aura/decision` frame |
 | Agent Skill contract is enforced, not assumed | `npm run validate:skills`, or `npm run verify` check 18 | 7 checks pass against the real `skills/aura-household/SKILL.md`; pointed at a deliberately broken fixture it exits 1 and names the offending key (`verify` check 18 does exactly that, with a temp directory it cleans up) |
 
-`npm run verify` prints `18/18 checks passed` and exits non-zero on any regression.
+`npm run verify` prints `19/19 checks passed` and exits non-zero on any regression.
 [`docs/RUN_LOG_2026-10-23B.md`](docs/RUN_LOG_2026-10-23B.md) is the current run — a clean clone of commit
 `6cb7293`, install, `validate:skills`, verify, demo, plus the tool/resource/prompt counts read off the
 running server.
@@ -198,9 +198,14 @@ The sequence is worth stating because the first result was not good enough:
    parser and added check 18, which fails a deliberately broken fixture in a temp directory and asserts the
    validator exits 1 naming the exact key. Suite went to 18/18. I then removed ~50 lines of dead duplicated
    parser code it had left behind and re-ran everything.
-4. **Checked by hand afterwards:** `npm run verify` 18/18, `npm run validate:skills`, `npm run demo`, a clean
+4. **Checked by hand afterwards:** `npm run verify`, `npm run validate:skills`, `npm run demo`, a clean
    re-clone, and a line-by-line read of the diff. Kiro ran no git command (forbidden in the prompt) — every
    commit here is authored by me.
+5. **The `explain` intent is mine, not Kiro's.** Kiro built the `describe_last_decision` tool, but the
+   flagship "explainable decision" claim was unreachable from the voice path: nothing routed a spoken
+   "why did that change?" to it, and `ui://aura/decision` was served over MCP yet never rendered. I added
+   the intent, the plan step, the spoken summary branch, the third decision frame in the demo UI, and
+   `verify` check 19 that proves the whole path over MCP. Suite is now 19/19.
 
 One limitation of this evidence, stated rather than hidden: the CLI session authenticated with the **GitHub
 social identity**, so the credit meter on the Builder ID account at `app.kiro.dev` does not show these
