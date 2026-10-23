@@ -66,7 +66,7 @@ Two other ways to see it work:
 
 ```bash
 npm run demo      # headless CLI: 4 spoken turns, ASCII cards, full trace, audit log
-npm run verify    # 15 acceptance checks (protocol, MCP Apps mime, guardrails, memory)
+npm run verify    # 17 acceptance checks (protocol, MCP Apps mime, guardrails, memory, decision audit)
 ```
 
 Deterministic demo data (recommended for recording, because it never shows third-party
@@ -103,7 +103,7 @@ into `.kiro/skills/`, `.claude/skills/` or `.github/skills/`.
 ## How it is built
 
 ```
-src/server.js      McpServer + Streamable HTTP (stateless), 13 tools, 5 resources, 3 prompts,
+src/server.js      McpServer + Streamable HTTP (stateless), 14 tools, 6 resources, 3 prompts,
                    /api/agent (simulated device), /api/resource (MCP Apps host), bearer-token option
 src/agent.js       classify -> plan -> act -> observe -> re-plan -> speak
 src/memory.js      household profile, sessions, audit log, spend cap, allergen vetoes
@@ -140,8 +140,9 @@ tool-calling model — the tool surface, guardrails and memory are unchanged.
 | Allergen memory | ask *"we are out of chai, order snacks"* | peanut brittle and yogurt vetoed *by name of the member they're unsafe for* |
 | Cross-session memory | movie night in `living-room`, then *"what did we watch last night?"* in `bedroom` | answers from carried memory, no questions back |
 | Curfew / quiet hours | `curl` the `hour: 23` example above | headlines skipped, calm card substituted, video converted to audio |
+| Decision is explainable, not just claimed | call `describe_last_decision`, or `npm run verify` check 17 | returns the routine's persisted trace: tools in execution order, every `added-by-agent` step with the planner's own reason text, every `skipped` step, and whether the spend cap blocked a purchase. `traceAvailable: false` when no trace was stored — it never guesses |
 
-`npm run verify` prints `15/15 checks passed` and exits non-zero on any regression.
+`npm run verify` prints `17/17 checks passed` and exits non-zero on any regression.
 [`docs/RUN_LOG_2026-10-22.md`](docs/RUN_LOG_2026-10-22.md) records a clean clone of commit `37c3104`
 run through exactly these commands — install, verify, demo, the curfew `curl`, and the browser surface —
 with the real output of each.
@@ -156,13 +157,39 @@ check that evidences it.
 | Agent Skill | `skills/aura-household/SKILL.md`, also served as `skill://` + `load_agent_skill` |
 | Track technology used **at runtime** in code, not just README | the simulated device is a real `StreamableHTTPClientTransport` client; `ui://` resources are read over MCP to render the panel |
 | Simulated Alexa+ experience in a web app | `src/ui/index.html` (allowed alternate path) |
-| Media support: cards, carousels | `_meta.ui.resourceUri` → `ui://aura/cards`, `ui://aura/plan` |
+| Media support: cards, carousels | `_meta.ui.resourceUri` → `ui://aura/cards`, `ui://aura/plan`, `ui://aura/decision` |
 | Purchasing capability | `place_order` behind a spend cap + explicit confirmation |
 | Context-aware, state across sessions | `src/memory.js`, `commit_routine`, `household_audit` |
 | Public repo with an open-source licence | this repository, `LICENSE` (Apache-2.0) |
 | Clear setup and run instructions | this file |
 | Open Source mini-challenge | see `docs/OPEN_SOURCE.md` (companion repo + contribution) |
+| AWS Builder mini-challenge (built with Kiro) | see `docs/KIRO_TASK.md` — `describe_last_decision`, its `ui://aura/decision` template and verify check 17 came out of Kiro CLI agent sessions run against this repo |
 | Product feedback / friction logs / feature requests | `PRODUCT_FEEDBACK.md`, `FRICTION_LOG.md`, `FEATURE_REQUESTS.md` |
+
+## Built with Kiro
+
+`describe_last_decision` — the tool, its `ui://aura/decision` template and verify check 17 — was written
+with **Kiro CLI 2.33.1**, not by hand. The verbatim prompts are in
+[`docs/KIRO_TASK_PROMPT.txt`](docs/KIRO_TASK_PROMPT.txt) and
+[`docs/KIRO_TASK_PROMPT_2.txt`](docs/KIRO_TASK_PROMPT_2.txt); what each session returned is recorded in
+[`docs/KIRO_TASK.md`](docs/KIRO_TASK.md).
+
+The sequence is worth stating because the first result was not good enough:
+
+1. **Session 1** added the tool, template and a check; `npm run verify` went to 16/16. But two fields were
+   inference dressed as fact: `addedByAgent` regex-matched the summary for words like `rain|curfew|quiet`,
+   and `skippedStep` was hardcoded `null`.
+2. **Session 2** was told to make those exact — persist the real trace when a routine commits, read from it,
+   delete the heuristic. Kiro diagnosed its own failing check 17: the `commit_routine` Zod schema silently
+   stripped the `trace` field before the handler ever saw it. It fixed the schema, threaded the trace through
+   `src/agent.js` → `src/memory.js`, removed the guesswork, and returned `traceAvailable: false` for legacy
+   data instead of inventing an answer. Suite went to 17/17.
+3. **Checked by hand afterwards:** `npm run verify` 17/17, `npm run demo`, a clean re-clone, and a line-by-line
+   read of the diff. Kiro ran no git command (forbidden in the prompt) — every commit here is authored by me.
+
+One limitation of this evidence, stated rather than hidden: the CLI session authenticated with the **GitHub
+social identity**, so the credit meter on the Builder ID account at `app.kiro.dev` does not show these
+sessions' usage.
 
 ## Third-party services
 

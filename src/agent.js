@@ -241,7 +241,13 @@ export async function runTurn(utterance, { call, session = 'living-room', now = 
   };
 
   if (commit && (ctx.intent === 'movieNight' || ctx.intent === 'morningBriefing' || ctx.intent === 'restock')) {
-    routine.committed = await call('commit_routine', { routine: { name: routine.name, spokenSummary: routine.spokenSummary, chosen: chosen?.title, spend: money.base }, session });
+    // Pass a compact trace ({ tool, status, why } only — no ms/summary/full results) so that
+    // describe_last_decision can read exact values instead of guessing from the summary text.
+    const compactTrace = trace.map((t) => ({ tool: t.tool, status: t.status, why: t.why || null }));
+    routine.committed = await call('commit_routine', {
+      routine: { name: routine.name, spokenSummary: routine.spokenSummary, chosen: chosen?.title, spend: money.base, trace: compactTrace },
+      session
+    });
   }
 
   return { intent: cls, ctx, routine, cards: buildCards(ctx, routine), ui: uiRefs(routine) };

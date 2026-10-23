@@ -1,0 +1,38 @@
+Your describe_last_decision implementation is merged and "npm run verify" passes 16/16, but two fields are
+guessed rather than known, and a hackathon judge will read that as the project claiming things it cannot
+prove. Fix it properly.
+
+Problem:
+- src/tools.js describeLastDecision() sets addedByAgent by regex-matching last.summary for words like
+  "rain|curfew|quiet". That is a guess about what the planner did.
+- It sets skippedStep to null with a comment saying trace-level granularity is not stored.
+- The truth is available at commit time: the agent's trace array (src/agent.js) already has per-step
+  status values "ok", "added-by-agent" and "skipped", plus a "why" for each.
+
+Required change:
+1. Persist the real trace with the committed routine. Where commit_routine / lastRoutine is written
+   (src/memory.js, called from src/agent.js), store a compact per-step record for that routine:
+   { tool, status, why } for every trace step, in execution order. Keep the stored shape small - do not
+   dump whole tool results into data/household.json.
+2. Make describe_last_decision read that persisted trace and return exact values:
+   - toolsInOrder: every tool in execution order, from the stored trace, not inferred from audit verbs.
+   - addedByAgent: the array of steps whose status was "added-by-agent", each with its real "why".
+   - skippedStep: the array of steps whose status was "skipped", each with its real reason.
+   - purchaseBlocked / blockedDetail: keep the existing audit-based detection, it is correct.
+   Delete the regex heuristic entirely. If no stored trace exists (older data file), return
+   traceAvailable: false instead of guessing, and say so in the spoken content[].
+3. Update src/ui/templates.js DECISION_TEMPLATE to render the re-plan and skipped steps with their reasons,
+   and the "no trace available" case.
+4. Tighten tests/verify.mjs check 9 (or add a 17th check) so it asserts the returned addedByAgent entry
+   carries the actual curfew "why" text produced by the planner run, and that a skipped step is reported
+   with its reason. The file must still print "N/N checks passed".
+
+Hard limits:
+- Do not run any git command (no commit, no push, no branch).
+- Do not access the network.
+- Only edit files inside this directory.
+- Do not weaken or delete any existing check.
+- After your changes run "npm run verify" AND "npm run demo" and report both outputs.
+
+Finish by listing the files you changed and stating exactly which fields are now backed by stored facts
+instead of inference.

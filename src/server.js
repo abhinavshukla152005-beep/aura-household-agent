@@ -10,7 +10,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { LATEST_PROTOCOL_VERSION } from '@modelcontextprotocol/sdk/types.js';
 import * as tools from './tools.js';
 import { runTurn } from './agent.js';
-import { CARDS_TEMPLATE, PLAN_TEMPLATE, poster } from './ui/templates.js';
+import { CARDS_TEMPLATE, PLAN_TEMPLATE, DECISION_TEMPLATE, poster } from './ui/templates.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 8787);
@@ -44,7 +44,7 @@ function newServer() {
         tools: {},
         resources: { subscribe: false, listChanged: false },
         prompts: {},
-        extensions: { 'mcp-app': { templates: ['ui://aura/cards', 'ui://aura/plan'] } }
+        extensions: { 'mcp-app': { templates: ['ui://aura/cards', 'ui://aura/plan', 'ui://aura/decision'] } }
       },
       instructions: `Aura is a household concierge add-on for Alexa+.
 Load the Agent Skill (resource ${SKILL_URI}, or tool load_agent_skill) before planning.
@@ -155,7 +155,14 @@ During quiet hours replace headline lists with a single learn_fact card.`
     title: 'Commit routine to memory',
     description: 'Hand the finished routine to household memory so a later conversation can continue it ("the film we picked last night").',
     inputSchema: {
-      routine: z.object({ name: z.string(), spokenSummary: z.string(), chosen: z.string().optional(), spend: z.number().optional() }),
+      routine: z.object({
+        name: z.string(),
+        spokenSummary: z.string(),
+        chosen: z.string().optional(),
+        spend: z.number().optional(),
+        // Compact per-step trace so describe_last_decision can return exact values.
+        trace: z.array(z.object({ tool: z.string(), status: z.string(), why: z.string().nullable().optional() })).optional()
+      }),
       session: z.string().optional()
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
@@ -174,6 +181,16 @@ During quiet hours replace headline lists with a single learn_fact card.`
     inputSchema: {},
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false }
   }, async () => ok(await tools.reset()));
+
+  mcp.registerTool('describe_last_decision', {
+    title: 'Describe last decision',
+    description: 'Summarise the most recently committed routine: the routine name, tools that ran, any agent re-plan step, any skipped step, and whether place_order was blocked by the spend cap.',
+    inputSchema: {},
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+  }, async () => {
+    const r = await tools.describeLastDecision();
+    return ok(r, ui('Describing the last decision', r.found ? r.routineName : 'No routine yet', 'ui://aura/decision'));
+  });
 
   mcp.registerTool('load_agent_skill', {
     title: 'Load Aura Agent Skill',
@@ -194,6 +211,12 @@ During quiet hours replace headline lists with a single learn_fact card.`
     description: 'Sandboxed HTML template showing every step, every re-plan and the final spoken response.',
     mimeType: 'text/html;profile=mcp-app'
   }, async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/html;profile=mcp-app', text: PLAN_TEMPLATE }] }));
+
+  mcp.registerResource('aura-decision-ui', 'ui://aura/decision', {
+    title: 'Aura last-decision summary',
+    description: 'Sandboxed HTML template showing the most recent committed routine: routine name, tools that ran, re-plan steps, skipped steps, and spend-cap status.',
+    mimeType: 'text/html;profile=mcp-app'
+  }, async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'text/html;profile=mcp-app', text: DECISION_TEMPLATE }] }));
 
   mcp.registerResource('aura-skill', SKILL_URI, {
     title: 'Aura Household Agent Skill',

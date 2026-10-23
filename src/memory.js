@@ -101,7 +101,9 @@ export async function notePreference({ member, key, value, session }) {
   return { member: m.name, key, value, totalMembers: s.members.length };
 }
 
-/** Cross-session continuity: the last completed routine is handed to the next conversation. */
+/** Cross-session continuity: the last completed routine is handed to the next conversation.
+ *  routine.trace is optional: if provided, store a compact per-step record { tool, status, why }
+ *  so describe_last_decision can return exact values rather than guessing from the summary text. */
 export async function commitRoutine(routine, session) {
   const s = await load();
   s.lastRoutine = {
@@ -112,6 +114,14 @@ export async function commitRoutine(routine, session) {
     chosen: routine.chosen || null,
     spend: routine.spend || 0
   };
+  // Store compact per-step trace if the caller provides it; keep shape minimal.
+  if (Array.isArray(routine.trace) && routine.trace.length) {
+    s.lastRoutine.trace = routine.trace.map((t) => ({
+      tool: t.tool,
+      status: t.status,
+      why: t.why || null
+    }));
+  }
   if (s.sessions[session]) s.sessions[session].carriedFrom = s.lastRoutine.id;
   log(session, 'commitRoutine', `${routine.name} -> ${s.lastRoutine.summary}`);
   await persist();

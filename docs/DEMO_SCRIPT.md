@@ -23,6 +23,11 @@ Open `http://localhost:8787`, DevTools closed, address bar visible (proves local
 | 7 | 2:25–2:40 | Terminal: `npm run verify` → `15/15 checks passed` | "Fifteen acceptance checks prove the protocol version, the MCP Apps mime type, the guardrail, the allergen veto and the cross-session memory. `npm start`, then open port 8787 — no keys, no hardware. Thanks for watching." |
 
 ## If a judge drives it themselves
+The recorded video says `15/15 checks passed` and shows 13 tools. That was true when it was captured; the
+repository now runs **17 checks** and advertises **14 tools** (`describe_last_decision` was added after the
+recording, built with Kiro — see `KIRO_TASK.md`). The video was not re-recorded, so the counts differ from
+`npm run verify` today; the README and `RUN_LOG` files reflect current state.
+
 The rain-driven re-plan in row 3 needs a rainy *observation*, which depends on the weather at the
 machine it runs on. Two ways to make it reproducible, neither of which touches the planner:
 - **household clock = 23:05** in the device bar (or `"hour": 23` in the JSON body) → the curfew

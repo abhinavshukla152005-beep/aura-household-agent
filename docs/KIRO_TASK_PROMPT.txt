@@ -1,0 +1,29 @@
+In this Node 20 ESM repository (aura-household-agent), add a new MCP tool named describe_last_decision.
+
+It takes no arguments. It reads the household audit log through the same path household_audit already uses
+(via src/memory.js) and returns the most recent committed routine: the routine name, the tools that ran in
+order, which trace step had status "added-by-agent" and its "why" text, which step was "skipped", and
+whether place_order was blocked by the spend cap.
+
+Follow this repository's existing conventions exactly. Do not invent a new style. Read src/tools.js,
+src/memory.js, src/ui/templates.js and tests/verify.mjs first, then imitate them.
+
+Requirements:
+1. Register describe_last_decision in src/tools.js beside the other tools, with a zod input schema.
+2. Return the standard triple every tool here returns: content[] for a voice-only client, structuredContent
+   for a data-only host, and _meta.ui.resourceUri bound to a new template "ui://aura/decision".
+3. Add "ui://aura/decision" in src/ui/templates.js with mimeType "text/html;profile=mcp-app", self-contained
+   with no remote assets, written the same way ui://aura/cards and ui://aura/plan are written.
+4. Add one check to tests/verify.mjs that calls describe_last_decision after the existing spend-guardrail
+   test and FAILS if the blocked purchase is not reported in the result. The file must still print
+   "N/N checks passed" with the count updated correctly.
+5. Keep every existing behaviour intact: do not change the planner, the guardrail logic, or any existing
+   tool's output shape.
+
+Hard limits:
+- Do not run any git command (no commit, no push, no branch).
+- Do not access the network.
+- Only edit files inside this directory.
+- After your changes, run "npm run verify" and report its exact output.
+
+Finish by listing the files you changed and, for each, one sentence on what you added.

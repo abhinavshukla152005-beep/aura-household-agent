@@ -18,11 +18,11 @@ the `npm run verify` check number that fails if the capability is removed:
 | "MCP Apps" | `ui://aura/cards`, `ui://aura/plan` served as `text/html;profile=mcp-app`, read back through MCP | 3 · *UI templates use the MCP Apps mime type* |
 | "Agent Skills" | `skills/aura-household/SKILL.md` + `references/`, also served as `skill://` and via `load_agent_skill` | 5 · *Agent Skill is loadable as an MCP resource* |
 
-(`verify` prints the 15 checks as labels in this fixed order, so the numbers above are the line
+(`verify` prints the 17 checks as labels in this fixed order, so the numbers above are the line
 positions.)
 
 The rules' *obvious* examples are "single-turn Q&A bot" and "basic MCP wrapper around an existing
-API". Neither applies: Aura re-plans mid-run, holds state across sessions, and its 13 tools expose
+API". Neither applies: Aura re-plans mid-run, holds state across sessions, and its 14 tools expose
 a policy engine, a memory model and a spending guardrail rather than proxying one API.
 
 Two other rule clauses that are easy to leave on the table, and where they are answered:
@@ -43,15 +43,15 @@ Track requirement: a self-hosted MCP server on spec **2025-11-25 or later, Strea
 | Real `McpServer` from `@modelcontextprotocol/sdk`, not a REST lookalike | `src/server.js:1` imports, `newServer()` |
 | Streamable HTTP transport, **stateless** (`sessionIdGenerator: undefined`) | `src/server.js` `/mcp` route |
 | Negotiated protocol version asserted, not assumed | `tests/verify.mjs` check 1, `GET /health` → `"protocol":"2025-11-25"` |
-| 13 tools with zod schemas, `structuredContent` **and** `content[]` **and** `_meta.ui` | `src/server.js` `registerTool` calls, `ok()` at `src/server.js:28` |
-| 5 resources + 3 prompts advertised in `capabilities` | `src/server.js:47` (incl. `extensions['mcp-app']`) |
+| 14 tools with zod schemas, `structuredContent` **and** `content[]` **and** `_meta.ui` | `src/server.js` `registerTool` calls, `ok()` at `src/server.js:28` |
+| 6 resources + 3 prompts advertised in `capabilities` | `src/server.js:47` (incl. `extensions['mcp-app']`) |
 | MCP Apps UI profile: `ui://` templates served as `text/html;profile=mcp-app` | `src/ui/templates.js`, `GET /api/resource?uri=` |
 | Agent Skill in the standard `SKILL.md` format, also served over MCP | `skills/aura-household/SKILL.md`, `skill://aura-household/SKILL.md`, `load_agent_skill` tool |
 | The demo device is a **genuine MCP client**, so nothing is faked between the two halves | `src/server.js` `/api/agent` → `Client` + `StreamableHTTPClientTransport` |
 | Agentic loop: classify → plan → act → observe → **re-plan** → speak | `src/agent.js:20,34,70,82` |
 | Auth surface (`AURA_TOKEN` bearer) and `/.well-known/oauth-protected-resource` | `src/server.js` |
 
-Fastest proof: `npm run verify` → 15 checks, all of which fail if the MCP surface is removed.
+Fastest proof: `npm run verify` → 17 checks, all of which fail if the MCP surface is removed.
 
 ## 2. Design — *complete, coherent experience; interaction model fits the device*
 
@@ -92,7 +92,7 @@ Each of those is a product decision a platform team could ship, and each is one 
 - The interesting question isn't "can a speaker fetch weather", it's **"how much autonomy do you
   give a device that can spend money and change someone else's settings?"** Aura answers it with
   a policy engine instead of a vibe.
-- The same 13 tools serve three different surfaces — MCP client, Agent Skill, simulated device —
+- The same 14 tools serve three different surfaces — MCP client, Agent Skill, simulated device —
   which is what an integration that survives contact with a real platform looks like.
 - The planner is deterministic on purpose: the re-plan rules are reviewable, testable and cheap,
   and the two swap points for an LLM (`classify`, `replan`) are named in the README.

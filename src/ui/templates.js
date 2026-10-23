@@ -107,6 +107,108 @@ export const PLAN_TEMPLATE = doc(
 }`
 );
 
+/** Decision summary: routine name, tool sequence, re-plan and skipped steps with their reasons,
+ *  and the spend-cap block. Handles both trace-backed and legacy (no trace) routines. */
+export const DECISION_TEMPLATE = doc(
+  'aura-decision',
+  `.hero{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:14px;margin-bottom:14px}
+  .hero .name{font-size:15px;font-weight:700;line-height:1.3}
+  .hero .meta{font-size:11px;color:var(--dim);margin-top:4px}
+  .hero .chosen{font-size:13px;color:var(--accent);margin-top:6px}
+  .section{margin-bottom:14px}
+  .section h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);margin:0 0 8px}
+  ol.tools{list-style:none;padding:0;margin:0;counter-reset:t}
+  ol.tools li{counter-increment:t;padding:7px 0 7px 28px;border-bottom:1px solid var(--ring);font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace;position:relative}
+  ol.tools li:last-child{border:0}
+  ol.tools li:before{content:counter(t);position:absolute;left:0;top:7px;width:20px;height:20px;background:#1f3550;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--dim)}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;background:#0d2438;color:#7fd8ff;border:1px solid var(--ring)}
+  .badge.warn{color:#f0a92a;border-color:#f0a92a44;background:#1a1200}
+  .badge.ok{color:#25d07a;border-color:#25d07a44;background:#001a0a}
+  .badge.blocked{color:#ff5c5c;border-color:#ff5c5c44;background:#1a0000}
+  .badge.info{color:#aac8ff;border-color:#3358aa44;background:#0a1030}
+  .block-row{background:var(--card);border:1px solid #ff5c5c44;border-radius:12px;padding:12px;font-size:13px;line-height:1.45}
+  .block-row .label{font-size:11px;text-transform:uppercase;color:#ff5c5c;margin-bottom:4px;letter-spacing:.03em}
+  .step-list{list-style:none;padding:0;margin:0}
+  .step-list li{padding:8px 0 8px 14px;border-left:3px solid var(--ring);margin-bottom:8px;border-radius:0 8px 8px 0;background:#11202f}
+  .step-list li.added{border-left-color:var(--accent)}
+  .step-list li.skipped{border-left-color:#f0a92a}
+  .step-tool{font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600;color:#bfe3ff}
+  .step-why{font-size:12px;color:var(--dim);margin-top:2px;line-height:1.4}
+  .no-trace{background:#0d1e2f;border:1px solid #f0a92a44;border-radius:10px;padding:11px;font-size:12px;color:#f0a92a;line-height:1.5}
+  .none{color:var(--dim);font-size:12px;font-style:italic}`,
+  `(d)=>{
+  if(!d||!d.found){return '<div class="wrap"><p class="empty">'+esc(d&&d.reason||'No data yet.')+'</p></div>';}
+
+  const hero='<div class="hero">'
+    +'<div class="name">'+esc(d.routineName)+'</div>'
+    +'<div class="meta">'+esc(d.committedAt?d.committedAt.replace('T',' ').slice(0,16)+' UTC':'')
+    +(d.routineId?' · id '+esc(d.routineId):'')+'</div>'
+    +(d.chosen?'<div class="chosen">Chosen: '+esc(d.chosen)+'</div>':'')
+    +'</div>';
+
+  // No trace available (legacy routine committed before trace storage was introduced)
+  if(!d.traceAvailable){
+    const flags=[];
+    if(d.purchaseBlocked) flags.push('<span class="badge blocked">🚫 purchase blocked by spend cap</span>');
+    else if(d.spend>0) flags.push('<span class="badge ok">✓ purchase within cap ('+esc(String(d.spend))+' USD)</span>');
+    const blockSection=d.purchaseBlocked
+      ?'<div class="section"><h2>Spend-cap block</h2><div class="block-row"><div class="label">blocked</div>'+esc(d.blockedDetail||'')+'</div></div>'
+      :'';
+    return '<div class="wrap">'+hero
+      +'<div class="section"><div class="no-trace">⚠ This routine was committed before per-step trace storage was introduced. '
+      +(d.reason||'Tool sequence and re-plan details are not available.')+'</div></div>'
+      +(flags.length?'<div class="section"><h2>Decision flags</h2><div class="badge-row">'+flags.join('')+'</div></div>':'')
+      +blockSection
+      +(d.summary?'<div class="section"><h2>Committed summary</h2><div style="font-size:13px;line-height:1.5;color:#bfe3ff">'+esc(d.summary)+'</div></div>':'')
+      +'</div>';
+  }
+
+  // Trace-backed rendering: exact values from stored trace.
+  const toolList=(d.toolsInOrder||[]);
+  const tools=toolList.length
+    ?'<ol class="tools">'+toolList.map((t)=>'<li>'+esc(t)+'</li>').join('')+'</ol>'
+    :'<p class="none">No tools recorded in trace.</p>';
+
+  // Re-plan steps: each has tool + why
+  const added=(d.addedByAgent||[]);
+  const addedHtml=added.length
+    ?'<ul class="step-list">'+added.map((s)=>'<li class="added"><div class="step-tool">+ '+esc(s.tool)+'</div><div class="step-why">'+esc(s.why||'')+'</div></li>').join('')+'</ul>'
+    :'<p class="none">No agent-added steps.</p>';
+
+  // Skipped steps: each has tool + reason
+  const skipped=(d.skippedSteps||[]);
+  const skippedHtml=skipped.length
+    ?'<ul class="step-list">'+skipped.map((s)=>'<li class="skipped"><div class="step-tool">⏭ '+esc(s.tool)+'</div><div class="step-why">'+esc(s.reason||'')+'</div></li>').join('')+'</ul>'
+    :'<p class="none">No skipped steps.</p>';
+
+  const flags=[];
+  if(added.length) flags.push('<span class="badge warn">⚡ '+added.length+' re-plan step'+(added.length!==1?'s':'')+'</span>');
+  if(skipped.length) flags.push('<span class="badge warn">⏭ '+skipped.length+' skipped step'+(skipped.length!==1?'s':'')+'</span>');
+  if(d.purchaseBlocked) flags.push('<span class="badge blocked">🚫 purchase blocked by spend cap</span>');
+  else if(d.spend>0) flags.push('<span class="badge ok">✓ purchase within cap ('+esc(String(d.spend))+' USD)</span>');
+  const badgeRow=flags.length?'<div class="badge-row">'+flags.join('')+'</div>':'<p class="none">No flags.</p>';
+
+  const blockSection=d.purchaseBlocked
+    ?'<div class="section"><h2>Spend-cap block</h2><div class="block-row"><div class="label">blocked</div>'+esc(d.blockedDetail||'')+'</div></div>'
+    :'';
+
+  const summarySection=d.summary
+    ?'<div class="section"><h2>Committed summary</h2><div style="font-size:13px;line-height:1.5;color:#bfe3ff">'+esc(d.summary)+'</div></div>'
+    :'';
+
+  return '<div class="wrap">'
+    +hero
+    +'<div class="section"><h2>Tools in order</h2>'+tools+'</div>'
+    +'<div class="section"><h2>Agent re-plan steps</h2>'+addedHtml+'</div>'
+    +'<div class="section"><h2>Skipped steps</h2>'+skippedHtml+'</div>'
+    +'<div class="section"><h2>Decision flags</h2>'+badgeRow+'</div>'
+    +blockSection
+    +summarySection
+    +'</div>';
+}`
+);
+
 /** Deterministic poster so the demo never needs third-party artwork. */
 export function poster(title = 'Aura') {
   const initials = title.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();

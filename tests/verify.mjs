@@ -99,6 +99,17 @@ async function main() {
     assert.ok(body.order.id);
   });
 
+  await check('describe_last_decision reports a blocked purchase when the spend cap fired', async () => {
+    // Seed a committed routine so lastRoutine is not null, then describe it.
+    await call('commit_routine', { routine: { name: 'Spend cap test', spokenSummary: 'Testing the spend cap guardrail.', spend: 60 }, session: 'verify' });
+    const r = await call('describe_last_decision');
+    const body = JSON.parse(r.content[0].text);
+    assert.ok(body.found, 'describe_last_decision returned found=false');
+    assert.ok(body.purchaseBlocked === true, 'purchaseBlocked should be true after the over-cap order above');
+    assert.ok(typeof body.blockedDetail === 'string' && body.blockedDetail.length > 0, 'missing blockedDetail');
+    assert.equal(r._meta.ui.resourceUri, 'ui://aura/decision');
+  });
+
   await check('allergen memory vetoes an item from the restock basket', async () => {
     const r = await call('pantry_status');
     const stock = JSON.parse(r.content[0].text);
@@ -112,7 +123,7 @@ async function main() {
     assert.ok(data.routine, 'no routine returned');
     assert.ok(data.routine.trace.some((t) => t.status === 'added-by-agent'), 'agent never re-planned');
     assert.ok(data.mcp.toolCount >= 12, 'agent did not see the tool surface');
-    assert.ok(data.mcp.uiTemplates.length === 2, 'agent did not see the ui:// templates');
+    assert.ok(data.mcp.uiTemplates.length === 3, 'agent did not see the ui:// templates');
     assert.ok(data.mcp.skillLoaded > 500, 'agent did not load the Agent Skill');
   });
 
@@ -158,6 +169,48 @@ async function main() {
     assert.ok(process.env.AURA_TOKEN ? proper.status === 401 : proper.ok, `initialize returned ${proper.status}`);
     const meta = await (await fetch(`${BASE}/.well-known/oauth-protected-resource`)).json();
     assert.ok(meta.resource.endsWith('/mcp') && meta.bearer_methods_supported.includes('header'), 'protected-resource metadata incomplete');
+  });
+
+  await check('describe_last_decision returns exact trace data: addedByAgent why and skippedSteps reason', async () => {
+    // Sub-check A: quiet-hours morning briefing at hour=23.
+    // Produces: news_briefing skipped (quiet hours) + learn_fact added-by-agent (replacement).
+    // morningBriefing IS committed, so lastRoutine.trace is populated.
+    await fetch(`${BASE}/api/agent`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ utterance: 'good morning', session: 'check17a', hour: 23 })
+    });
+    const ra = await call('describe_last_decision');
+    const a = JSON.parse(ra.content[0].text);
+    assert.ok(a.found, 'sub-check A: describe_last_decision returned found=false');
+    assert.ok(a.traceAvailable === true, 'sub-check A: traceAvailable should be true after morningBriefing commit');
+    // toolsInOrder must be a non-empty array of strings from the real trace.
+    assert.ok(Array.isArray(a.toolsInOrder) && a.toolsInOrder.length > 0, 'sub-check A: toolsInOrder must be a non-empty array');
+    assert.ok(a.toolsInOrder.every((t) => typeof t === 'string'), 'sub-check A: toolsInOrder entries must be strings');
+    // skippedSteps must have the quiet-hours news_briefing skip with its real reason string.
+    assert.ok(Array.isArray(a.skippedSteps) && a.skippedSteps.length > 0,
+      'sub-check A: skippedSteps must be non-empty (quiet-hours news_briefing skip expected at hour=23)');
+    assert.ok(a.skippedSteps.every((s) => typeof s.reason === 'string' && s.reason.length > 0),
+      'sub-check A: every skippedStep must carry a non-empty reason string');
+
+    // Sub-check B: curfew movie-night at hour=23.
+    // Produces: media_search added-by-agent with "Past the 22:00 screen-time curfew..." why text.
+    // movieNight IS committed, so lastRoutine.trace is updated.
+    await fetch(`${BASE}/api/agent`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ utterance: 'set up a movie night for everyone', session: 'check17b', hour: 23 })
+    });
+    const rb = await call('describe_last_decision');
+    const b = JSON.parse(rb.content[0].text);
+    assert.ok(b.found, 'sub-check B: describe_last_decision returned found=false');
+    assert.ok(b.traceAvailable === true, 'sub-check B: traceAvailable should be true after movieNight commit');
+    // addedByAgent must contain the real curfew step with its why text.
+    assert.ok(Array.isArray(b.addedByAgent) && b.addedByAgent.length > 0,
+      'sub-check B: addedByAgent must be non-empty (curfew re-plan expected at hour=23)');
+    const curfewStep = b.addedByAgent.find((s) => /curfew/i.test(s.why || ''));
+    assert.ok(curfewStep,
+      `sub-check B: expected a curfew addedByAgent step; got: ${JSON.stringify(b.addedByAgent.map((s) => s.why))}`);
+    assert.ok(typeof curfewStep.why === 'string' && curfewStep.why.length > 10,
+      'sub-check B: curfew addedByAgent.why must be a real sentence from the planner, not a guess');
   });
 
   await client.close();
