@@ -67,10 +67,30 @@ Told to persist the real trace and stop inferring. Kiro changed `src/memory.js`,
   fixed it, and the check then failed on a second, real difference (no `skipped` step in that scenario),
   which it resolved by asserting against a scenario that genuinely has one.
 
+### Session 3 — the skill validator, 18/18
+
+Prompt: [`KIRO_TASK_PROMPT_3.txt`](KIRO_TASK_PROMPT_3.txt). Scope was feature request #8: `SKILL.md`
+frontmatter has no validator, so a typo means the agent silently ignores the skill.
+
+Delivered `scripts/validate-skills.mjs` (no new dependencies, hand-written frontmatter parser), the
+`validate:skills` npm script, and verify check 18, which builds a broken skill in a temp directory,
+runs the validator against it and asserts exit 1 with the offending key named — a real positive control,
+not a smoke test.
+
+Two things worth recording about the output:
+
+- Kiro derived the contract from `src/server.js` (the `skill://aura-household/SKILL.md` URI, the path it
+  reads, the server name) rather than inventing rules, and its report cited those lines.
+- It left behind a second, near-identical copy of the parser's block-reading function (~50 unused lines)
+  and could not run `npm run validate:skills` itself because PowerShell execution policy blocks npm
+  scripts on this machine — it said so in its "what I could not verify" section instead of claiming the
+  alias worked. I deleted the dead function and ran `npm run validate:skills` here: exit 0, 7 checks pass.
+
 ### What I did, not Kiro
 
 Kiro ran no git command — the prompts forbid commit/push/branch, and `git status` confirmed it only edited
-files. Verification afterwards was manual: `npm run verify` 17/17, `npm run demo`, a fresh clone of the
+files. Verification afterwards was manual: `npm run verify` 18/18, `npm run validate:skills`, `npm run demo`,
+a fresh clone of the
 pushed commit, and a read of the diff. Tool/resource/prompt counts in the README were corrected by hand
 after measuring the running server (14 tools, 6 resources, 3 prompts, 3 `ui://` templates) instead of
 trusting the docs.

@@ -24,9 +24,10 @@ Open `http://localhost:8787`, DevTools closed, address bar visible (proves local
 
 ## If a judge drives it themselves
 The recorded video says `15/15 checks passed` and shows 13 tools. That was true when it was captured; the
-repository now runs **17 checks** and advertises **14 tools** (`describe_last_decision` was added after the
-recording, built with Kiro — see `KIRO_TASK.md`). The video was not re-recorded, so the counts differ from
-`npm run verify` today; the README and `RUN_LOG` files reflect current state.
+repository now runs **18 checks** and advertises **14 tools** (`describe_last_decision` and the
+`validate:skills` contract check were added after the recording, both built with Kiro — see `KIRO_TASK.md`).
+The video was not re-recorded, so the counts differ from `npm run verify` today; the README and `RUN_LOG`
+files reflect current state.
 
 The rain-driven re-plan in row 3 needs a rainy *observation*, which depends on the weather at the
 machine it runs on. Two ways to make it reproducible, neither of which touches the planner:

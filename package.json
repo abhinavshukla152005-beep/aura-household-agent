@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "demo": "node scripts/demo.mjs",
-    "verify": "node tests/verify.mjs"
+    "verify": "node tests/verify.mjs",
+    "validate:skills": "node scripts/validate-skills.mjs"
   },
   "keywords": [
     "mcp",

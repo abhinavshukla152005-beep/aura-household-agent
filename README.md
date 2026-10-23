@@ -65,8 +65,9 @@ request #1 and friction F1 in [`FRICTION_LOG.md`](FRICTION_LOG.md).
 Two other ways to see it work:
 
 ```bash
-npm run demo      # headless CLI: 4 spoken turns, ASCII cards, full trace, audit log
-npm run verify    # 17 acceptance checks (protocol, MCP Apps mime, guardrails, memory, decision audit)
+npm run demo           # headless CLI: 4 spoken turns, ASCII cards, full trace, audit log
+npm run verify         # 18 acceptance checks (protocol, MCP Apps mime, guardrails, memory, decision audit, skill contract)
+npm run validate:skills # check SKILL.md frontmatter against what the server actually registers
 ```
 
 Deterministic demo data (recommended for recording, because it never shows third-party
@@ -141,8 +142,9 @@ tool-calling model — the tool surface, guardrails and memory are unchanged.
 | Cross-session memory | movie night in `living-room`, then *"what did we watch last night?"* in `bedroom` | answers from carried memory, no questions back |
 | Curfew / quiet hours | `curl` the `hour: 23` example above | headlines skipped, calm card substituted, video converted to audio |
 | Decision is explainable, not just claimed | call `describe_last_decision`, or `npm run verify` check 17 | returns the routine's persisted trace: tools in execution order, every `added-by-agent` step with the planner's own reason text, every `skipped` step, and whether the spend cap blocked a purchase. `traceAvailable: false` when no trace was stored — it never guesses |
+| Agent Skill contract is enforced, not assumed | `npm run validate:skills`, or `npm run verify` check 18 | 7 checks pass against the real `skills/aura-household/SKILL.md`; pointed at a deliberately broken fixture it exits 1 and names the offending key (`verify` check 18 does exactly that, with a temp directory it cleans up) |
 
-`npm run verify` prints `17/17 checks passed` and exits non-zero on any regression.
+`npm run verify` prints `18/18 checks passed` and exits non-zero on any regression.
 [`docs/RUN_LOG_2026-10-23.md`](docs/RUN_LOG_2026-10-23.md) records a clean clone of commit `99ea087` run
 through exactly these commands — install, verify, demo, and a real MCP `callTool` of
 `describe_last_decision` — with the real output of each;
@@ -164,15 +166,17 @@ check that evidences it.
 | Public repo with an open-source licence | this repository, `LICENSE` (Apache-2.0) |
 | Clear setup and run instructions | this file |
 | Open Source mini-challenge | see `docs/OPEN_SOURCE.md` (companion repo + contribution) |
-| AWS Builder mini-challenge (built with Kiro) | see `docs/KIRO_TASK.md` — `describe_last_decision`, its `ui://aura/decision` template and verify check 17 came out of Kiro CLI agent sessions run against this repo |
+| AWS Builder mini-challenge (built with Kiro) | see `docs/KIRO_TASK.md` — `describe_last_decision`, its `ui://aura/decision` template and verify check 17, plus `scripts/validate-skills.mjs` and check 18, came out of Kiro CLI 2.33.1 agent sessions run against this repo. No AWS service runs inside Aura; Kiro was the build tool, and that distinction is stated in the submission |
 | Product feedback / friction logs / feature requests | `PRODUCT_FEEDBACK.md`, `FRICTION_LOG.md`, `FEATURE_REQUESTS.md` |
 
 ## Built with Kiro
 
-`describe_last_decision` — the tool, its `ui://aura/decision` template and verify check 17 — was written
-with **Kiro CLI 2.33.1**, not by hand. The verbatim prompts are in
-[`docs/KIRO_TASK_PROMPT.txt`](docs/KIRO_TASK_PROMPT.txt) and
-[`docs/KIRO_TASK_PROMPT_2.txt`](docs/KIRO_TASK_PROMPT_2.txt); what each session returned is recorded in
+`describe_last_decision` — the tool, its `ui://aura/decision` template and verify check 17 — and
+`scripts/validate-skills.mjs` with verify check 18 were written with **Kiro CLI 2.33.1**, not by hand.
+The verbatim prompts are in
+[`docs/KIRO_TASK_PROMPT.txt`](docs/KIRO_TASK_PROMPT.txt),
+[`docs/KIRO_TASK_PROMPT_2.txt`](docs/KIRO_TASK_PROMPT_2.txt) and
+[`docs/KIRO_TASK_PROMPT_3.txt`](docs/KIRO_TASK_PROMPT_3.txt); what each session returned is recorded in
 [`docs/KIRO_TASK.md`](docs/KIRO_TASK.md).
 
 The sequence is worth stating because the first result was not good enough:
@@ -185,8 +189,15 @@ The sequence is worth stating because the first result was not good enough:
    stripped the `trace` field before the handler ever saw it. It fixed the schema, threaded the trace through
    `src/agent.js` → `src/memory.js`, removed the guesswork, and returned `traceAvailable: false` for legacy
    data instead of inventing an answer. Suite went to 17/17.
-3. **Checked by hand afterwards:** `npm run verify` 17/17, `npm run demo`, a clean re-clone, and a line-by-line
-   read of the diff. Kiro ran no git command (forbidden in the prompt) — every commit here is authored by me.
+3. **Session 3** was given feature request #8 — a skill validator, because a typo in `SKILL.md` frontmatter
+   is otherwise discovered only by the agent quietly ignoring the skill. Kiro read `src/server.js`, derived
+   the contract from the code that registers the `skill://` resource, wrote a dependency-free frontmatter
+   parser and added check 18, which fails a deliberately broken fixture in a temp directory and asserts the
+   validator exits 1 naming the exact key. Suite went to 18/18. I then removed ~50 lines of dead duplicated
+   parser code it had left behind and re-ran everything.
+4. **Checked by hand afterwards:** `npm run verify` 18/18, `npm run validate:skills`, `npm run demo`, a clean
+   re-clone, and a line-by-line read of the diff. Kiro ran no git command (forbidden in the prompt) — every
+   commit here is authored by me.
 
 One limitation of this evidence, stated rather than hidden: the CLI session authenticated with the **GitHub
 social identity**, so the credit meter on the Builder ID account at `app.kiro.dev` does not show these

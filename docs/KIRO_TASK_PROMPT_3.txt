@@ -1,0 +1,53 @@
+You are working in this repo only: C:/Users/Abhinav Shukla/Documents/Qoder/2026-10-21/0799ce83/AlexaPlusProject/Aura
+
+Hard rules for this session:
+- Do NOT run any git command (no git add/commit/push/status/diff/log). Do not touch the network.
+- Do not reformat files you are not changing. Do not add comments explaining what code does.
+- Every claim you report at the end must be something you actually ran and read the output of.
+- If a test you write would pass only because of a mock or a hard-coded string, say so instead of writing it.
+
+TASK: build a real validator for the Agent Skills surface, because a typo in SKILL.md
+frontmatter is currently discovered only by the agent silently ignoring the skill
+(see FEATURE_REQUESTS.md row 8, "Skill validator").
+
+Deliverables:
+
+1. `scripts/validate-skills.mjs` - an ESM Node script, zero new npm dependencies, that:
+   a. finds every `skills/*/SKILL.md` in this repo;
+   b. parses its YAML frontmatter with a minimal parser you write yourself (the repo has no yaml
+      dependency - do NOT add one; handle only what the existing SKILL.md files actually use);
+   c. validates it against the contract the server itself enforces. READ the server code first
+      (src/server.js, src/skills*.js or wherever the `skill://` resource is registered and where
+      `load_agent_skill` is defined) and derive the required keys from that code, not from guesswork.
+      The validator must fail if the frontmatter disagrees with what the server exposes: for example
+      if a `name`/`description` key is missing or empty, if the skill's declared name does not match
+      the directory name, or if the file that the server registers as a `skill://` resource does not
+      exist on disk.
+   d. prints one line per problem as `FAIL <file>: <what is wrong and which key>` and one line per
+      check that passed, then exits 1 if anything failed, 0 otherwise.
+   e. accepts an optional directory argument (default `skills`) so it can be pointed at a broken
+      fixture.
+
+2. Add `"validate:skills": "node scripts/validate-skills.mjs"` to package.json scripts. Do not
+   change any other script.
+
+3. Add ONE new acceptance check to `tests/verify.mjs` so the suite goes from 17 to 18 checks.
+   It must prove the validator actually catches a broken skill, not just that it runs: create a
+   temporary throwaway skills directory under the system temp dir (or `tests/tmp-*`), write a
+   deliberately malformed SKILL.md into it, run the validator against that directory, and assert
+   exit code 1 and that the reported problem names the specific broken key. Clean up the temp
+   directory afterwards, including on failure.
+
+Then run, in this order, and show me the real output of each:
+  node scripts/validate-skills.mjs
+  npm run verify
+  npm run demo
+
+The suite must end at `18/18 checks passed` and `npm run demo` must still exit 0.
+
+Finally report, in this exact structure:
+A. FILES CHANGED - one line each: path + what changed.
+B. THE CONTRACT YOU DERIVED - the required frontmatter keys, and the file:line of the server code
+   you read each one from.
+C. OUTPUT - the literal last lines of each of the three commands.
+D. WHAT YOU COULD NOT VERIFY and why. Be honest; "I did not check X" is a valid answer.

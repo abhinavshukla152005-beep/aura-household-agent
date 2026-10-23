@@ -213,6 +213,57 @@ async function main() {
       'sub-check B: curfew addedByAgent.why must be a real sentence from the planner, not a guess');
   });
 
+  await check('validate-skills catches a broken skill and exits 1', async () => {
+    const { mkdtemp, mkdir, writeFile, rm } = await import('node:fs/promises');
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const os = await import('node:os');
+    const execFileP = promisify(execFile);
+
+    const tmpBase = await mkdtemp(path.join(os.tmpdir(), 'aura-skill-test-'));
+    try {
+      // Create a skill directory whose name is 'wrong-name' but whose frontmatter
+      // declares name: 'mismatched-name' — the validator must catch the mismatch.
+      // Also omit the description key entirely so there are two distinct failures.
+      const skillDir = path.join(tmpBase, 'wrong-name');
+      await mkdir(skillDir, { recursive: true });
+      const broken = [
+        '---',
+        'name: mismatched-name',
+        'allowed-tools:',
+        '  - household_profile',
+        'metadata:',
+        '  mcp-server: aura-household-agent',
+        '  mcp-protocol: "2025-11-25"',
+        '---',
+        '',
+        '# Broken skill (no description, name mismatch)'
+      ].join('\n');
+      await writeFile(path.join(skillDir, 'SKILL.md'), broken, 'utf8');
+
+      let exitCode = 0;
+      let stdout = '';
+      let stderr = '';
+      try {
+        const r = await execFileP(process.execPath, [path.join(ROOT, 'scripts', 'validate-skills.mjs'), tmpBase]);
+        stdout = r.stdout;
+        stderr = r.stderr;
+      } catch (err) {
+        exitCode = err.code ?? 1;
+        stdout = err.stdout ?? '';
+        stderr = err.stderr ?? '';
+      }
+
+      assert.equal(exitCode, 1, `validator exited ${exitCode}, expected 1 (broken skill should fail)`);
+      assert.match(stdout, /FAIL.*wrong-name.*SKILL\.md.*description/i,
+        `stdout must name the "description" key as a problem; got:\n${stdout}`);
+      assert.match(stdout, /FAIL.*wrong-name.*SKILL\.md.*name.*mismatch|mismatch.*name/i,
+        `stdout must report the name/directory mismatch; got:\n${stdout}`);
+    } finally {
+      await rm(tmpBase, { recursive: true, force: true });
+    }
+  });
+
   await client.close();
   child.kill();
 
